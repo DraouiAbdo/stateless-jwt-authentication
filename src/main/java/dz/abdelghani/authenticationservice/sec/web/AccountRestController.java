@@ -4,6 +4,7 @@ import dz.abdelghani.authenticationservice.sec.entities.AppRole;
 import dz.abdelghani.authenticationservice.sec.entities.AppUser;
 import dz.abdelghani.authenticationservice.sec.services.AccountServiceImpl;
 import lombok.Data;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,16 +21,19 @@ public class AccountRestController {
     }
 
     @GetMapping("/users")
+    @PostAuthorize("hasAuthority('USER')")
     public List<AppUser> allUsers(){
         return accountService.allUsers();
     }
 
     @PostMapping("/users")
+    @PostAuthorize("hasAuthority('ADMIN')")
     public AppUser createUser(@RequestBody AppUser appUser){
         return accountService.createNewUser(appUser);
     }
 
     @PostMapping("/roles")
+    @PostAuthorize("hasAuthority('ADMIN')")
     public AppRole createRole(@RequestBody AppRole appRole){
         return accountService.createNewRole(appRole);
     }
