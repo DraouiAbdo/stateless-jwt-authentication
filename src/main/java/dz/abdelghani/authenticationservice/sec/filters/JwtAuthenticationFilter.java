@@ -2,6 +2,7 @@ package dz.abdelghani.authenticationservice.sec.filters;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -30,6 +33,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                                 HttpServletResponse response)
                                                                 throws AuthenticationException {
 
+        System.out.println("Attempt authentication");
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
@@ -48,7 +52,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                                             throws IOException, ServletException {
         System.out.println("successful authentication");
 
-        
+
         User user = (User)authResult.getPrincipal();
 
         Algorithm algorithm = Algorithm.HMAC256("tindouf");
@@ -62,7 +66,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("roles",roles)
                 .sign(algorithm);
 
+        String jwtRefreshToken = JWT.create()
+                .withSubject(user.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis()+10*60*1000))
+                .withIssuer(request.getRequestURL().toString())
+                .sign(algorithm);
 
-        response.setHeader("Authorization",jwtAccessToken);
+        Map<String,String> idToken = new HashMap<>();
+        idToken.put("access-token",jwtAccessToken);
+        idToken.put("refresh-token",jwtRefreshToken);
+
+        response.setContentType("application/json");
+
+        new ObjectMapper().writeValue(response.getOutputStream(),idToken);
     }
 }
