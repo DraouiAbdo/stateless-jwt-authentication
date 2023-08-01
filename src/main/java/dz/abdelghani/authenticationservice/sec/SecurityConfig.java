@@ -2,6 +2,7 @@ package dz.abdelghani.authenticationservice.sec;
 
 import dz.abdelghani.authenticationservice.sec.entities.AppUser;
 import dz.abdelghani.authenticationservice.sec.filters.JwtAuthenticationFilter;
+import dz.abdelghani.authenticationservice.sec.filters.JwtAuthorizationFilter;
 import dz.abdelghani.authenticationservice.sec.services.AccountService;
 import dz.abdelghani.authenticationservice.sec.services.AccountServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //http.formLogin();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new JwtAuthenticationFilter(authenticationManagerBean()));
+        http.addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
 
